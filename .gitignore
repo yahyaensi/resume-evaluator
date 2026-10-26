@@ -1,0 +1,10 @@
+target/
+*.xlsx
+cvs/
+.idea/
+*.iml
+.settings
+.classpath
+.factorypath
+.project
+**/*client_secret.json

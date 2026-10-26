@@ -1,0 +1,225 @@
+name: Build portable apps and Windows MSI
+
+on:
+  workflow_dispatch:
+  push:
+    tags:
+      - "v*"
+
+permissions:
+  contents: read
+
+jobs:
+  package:
+    name: Package ${{ matrix.os }}
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - os: windows-latest
+            platform: windows
+          - os: ubuntu-latest
+            platform: linux
+          - os: macos-latest
+            platform: macos
+    runs-on: ${{ matrix.os }}
+    timeout-minutes: 45
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Set up Java
+        uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: "17"
+
+      - name: Read application version
+        id: metadata
+        shell: pwsh
+        run: |
+          [xml]$pom = Get-Content -LiteralPath "pom.xml"
+          $version = $pom.SelectSingleNode("/*[local-name()='project']/*[local-name()='version']").InnerText
+          if ($env:GITHUB_REF_TYPE -eq "tag" -and $env:GITHUB_REF_NAME -ne "v$version") {
+            throw "Release tag $env:GITHUB_REF_NAME must match the Maven version v$version."
+          }
+          "version=$version" >> $env:GITHUB_OUTPUT
+
+      - name: Add OAuth client configuration
+        shell: pwsh
+        env:
+          CLIENT_SECRET_JSON: ${{ secrets.CLIENT_SECRET_JSON }}
+        run: |
+          if ([string]::IsNullOrWhiteSpace($env:CLIENT_SECRET_JSON)) {
+            throw "Configure the CLIENT_SECRET_JSON Actions secret before running this workflow."
+          }
+          $client = $env:CLIENT_SECRET_JSON | ConvertFrom-Json
+          if (-not $client.installed -or -not $client.installed.client_id -or -not $client.installed.client_secret) {
+            throw "CLIENT_SECRET_JSON must contain an OAuth desktop client's installed.client_id and installed.client_secret."
+          }
+          $destination = Join-Path $PWD "src/main/resources/client_secret.json"
+          [System.IO.File]::WriteAllText(
+            $destination,
+            $env:CLIENT_SECRET_JSON,
+            [System.Text.UTF8Encoding]::new($false)
+          )
+
+      - name: Build and test
+        run: mvn --batch-mode clean package
+
+      - name: Install WiX Toolset
+        if: matrix.platform == 'windows'
+        shell: pwsh
+        run: |
+          $wixTools = @("heat.exe", "candle.exe", "light.exe")
+          $missingTools = @($wixTools | Where-Object { -not (Get-Command $_ -ErrorAction SilentlyContinue) })
+          if ($missingTools.Count -gt 0) {
+            choco install wixtoolset --yes --no-progress
+            if ($LASTEXITCODE -ne 0) {
+              throw "WiX Toolset installation failed."
+            }
+          }
+
+          $wixBin = (Get-Command candle.exe -ErrorAction SilentlyContinue).Source | Split-Path
+          if (-not $wixBin) {
+            $wixBin = Get-ChildItem "C:\Program Files (x86)" -Directory -Filter "WiX Toolset*" |
+              ForEach-Object { Join-Path $_.FullName "bin" } |
+              Where-Object { Test-Path (Join-Path $_ "candle.exe") } |
+              Sort-Object -Descending |
+              Select-Object -First 1
+          }
+          if (-not $wixBin) {
+            throw "Could not locate the WiX Toolset bin directory."
+          }
+          $env:PATH = "$wixBin;$env:PATH"
+          $wixBin >> $env:GITHUB_PATH
+
+          foreach ($tool in $wixTools) {
+            if (-not (Get-Command $tool -ErrorAction SilentlyContinue)) {
+              throw "WiX Toolset is missing $tool."
+            }
+          }
+
+      - name: Build Windows portable app and MSI
+        if: matrix.platform == 'windows'
+        shell: pwsh
+        env:
+          APP_VERSION: ${{ steps.metadata.outputs.version }}
+          RUNNER_ARCH: ${{ runner.arch }}
+        run: |
+          .\package-windows.ps1 -SkipBuild
+          $dist = Join-Path $PWD "target\dist"
+          New-Item -ItemType Directory -Path $dist -Force | Out-Null
+          $archive = "resume-evaluator-$env:APP_VERSION-windows-$($env:RUNNER_ARCH.ToLowerInvariant()).zip"
+          Compress-Archive `
+            -Path "target\windows-installer-build\ResumeEvaluator" `
+            -DestinationPath (Join-Path $dist $archive) `
+            -CompressionLevel Optimal
+          Copy-Item "target\windows-installer\ResumeEvaluator-$env:APP_VERSION.msi" $dist
+
+      - name: Build Linux portable app
+        if: matrix.platform == 'linux'
+        shell: bash
+        env:
+          APP_VERSION: ${{ steps.metadata.outputs.version }}
+          RUNNER_ARCH: ${{ runner.arch }}
+        run: |
+          rm -rf target/jpackage-input target/portable
+          mkdir -p target/jpackage-input target/portable target/dist
+          arch=$(printf '%s' "$RUNNER_ARCH" | tr '[:upper:]' '[:lower:]')
+          cp "target/resume-evaluator-$APP_VERSION.jar" target/jpackage-input/
+          jpackage \
+            --type app-image \
+            --name ResumeEvaluator \
+            --app-version "$APP_VERSION" \
+            --vendor "Resume Evaluator" \
+            --input target/jpackage-input \
+            --main-jar "resume-evaluator-$APP_VERSION.jar" \
+            --main-class com.hr.App \
+            --icon src/main/resources/logo.png \
+            --dest target/portable
+          tar -czf "target/dist/resume-evaluator-$APP_VERSION-linux-$arch.tar.gz" \
+            -C target/portable ResumeEvaluator
+
+      - name: Build macOS portable app
+        if: matrix.platform == 'macos'
+        shell: bash
+        env:
+          APP_VERSION: ${{ steps.metadata.outputs.version }}
+          RUNNER_ARCH: ${{ runner.arch }}
+        run: |
+          rm -rf target/jpackage-input target/portable
+          mkdir -p target/jpackage-input target/portable target/dist
+          arch=$(printf '%s' "$RUNNER_ARCH" | tr '[:upper:]' '[:lower:]')
+          cp "target/resume-evaluator-$APP_VERSION.jar" target/jpackage-input/
+          mkdir -p target/ResumeEvaluator.iconset
+          for size in 16 32 128 256 512; do
+            sips -z "$size" "$size" src/main/resources/logo.png \
+              --out "target/ResumeEvaluator.iconset/icon_${size}x${size}.png" >/dev/null
+            double_size=$((size * 2))
+            sips -z "$double_size" "$double_size" src/main/resources/logo.png \
+              --out "target/ResumeEvaluator.iconset/icon_${size}x${size}@2x.png" >/dev/null
+          done
+          iconutil -c icns target/ResumeEvaluator.iconset \
+            -o target/ResumeEvaluator.icns
+          jpackage \
+            --type app-image \
+            --name ResumeEvaluator \
+            --app-version "$APP_VERSION" \
+            --vendor "Resume Evaluator" \
+            --input target/jpackage-input \
+            --main-jar "resume-evaluator-$APP_VERSION.jar" \
+            --main-class com.hr.App \
+            --icon target/ResumeEvaluator.icns \
+            --dest target/portable
+          ditto -c -k --sequesterRsrc --keepParent \
+            target/portable/ResumeEvaluator.app \
+            "target/dist/resume-evaluator-$APP_VERSION-macos-$arch.zip"
+
+      - name: Upload packages
+        uses: actions/upload-artifact@v4
+        with:
+          name: resume-evaluator-${{ steps.metadata.outputs.version }}-${{ matrix.platform }}-${{ runner.arch }}
+          path: target/dist/*
+          if-no-files-found: error
+          retention-days: 30
+
+      - name: Remove OAuth client configuration
+        if: always()
+        shell: pwsh
+        run: |
+          $clientSecret = Join-Path $PWD "src/main/resources/client_secret.json"
+          if (Test-Path -LiteralPath $clientSecret) {
+            Remove-Item -LiteralPath $clientSecret -Force
+          }
+
+  publish:
+    name: Publish release assets
+    if: startsWith(github.ref, 'refs/tags/')
+    needs: package
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+
+    steps:
+      - name: Download all platform packages
+        uses: actions/download-artifact@v4
+        with:
+          pattern: resume-evaluator-*
+          path: release-assets
+          merge-multiple: true
+
+      - name: Create or update GitHub release
+        env:
+          GH_TOKEN: ${{ github.token }}
+          GH_REPO: ${{ github.repository }}
+          TAG_NAME: ${{ github.ref_name }}
+        run: |
+          if gh release view "$TAG_NAME" >/dev/null 2>&1; then
+            gh release upload "$TAG_NAME" release-assets/* --clobber
+          else
+            gh release create "$TAG_NAME" release-assets/* \
+              --title "Resume Evaluator $TAG_NAME" \
+              --generate-notes
+          fi
