@@ -1,0 +1,6 @@
+Développeur Java Senior (H/F)
+
+Nous recherchons un développeur Java senior pour renforcer notre équipe.
+Compétences attendues : Java 17, Spring Boot, microservices, Kafka, SQL,
+Docker, Kubernetes, CI/CD (Jenkins), AWS. Une connaissance de React et
+TypeScript est un plus. Méthodes agiles (Scrum), tests unitaires (JUnit, Mockito).

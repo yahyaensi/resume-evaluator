@@ -1,0 +1,70 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Wix xmlns="http://schemas.microsoft.com/wix/2006/wi">
+  <Product Id="*"
+           Name="Resume Evaluator"
+           Language="1036"
+           Version="$(var.ProductVersion)"
+           Manufacturer="Resume Evaluator"
+           UpgradeCode="bab5deef-f52b-4704-8bc8-24bd78a72986">
+    <Package InstallerVersion="500"
+             Compressed="yes"
+             InstallScope="perUser"
+             Platform="x64" />
+    <MajorUpgrade AllowSameVersionUpgrades="yes"
+                  DowngradeErrorMessage="Une version plus récente est déjà installée." />
+    <MediaTemplate EmbedCab="yes" />
+
+    <Property Id="WIXUI_INSTALLDIR" Value="INSTALLFOLDER" />
+    <Property Id="ARPPRODUCTICON" Value="ApplicationIcon" />
+    <Icon Id="ApplicationIcon" SourceFile="$(var.ProjectDir)\src\main\resources\logo.ico" />
+    <UIRef Id="WixUI_InstallDir" />
+
+    <Directory Id="TARGETDIR" Name="SourceDir">
+      <Directory Id="LocalAppDataFolder">
+        <Directory Id="INSTALLFOLDER" Name="ResumeEvaluator" />
+      </Directory>
+      <Directory Id="ProgramMenuFolder">
+        <Directory Id="ApplicationProgramsFolder" Name="Resume Evaluator" />
+      </Directory>
+      <Directory Id="DesktopFolder" />
+    </Directory>
+
+    <Feature Id="MainFeature" Title="Resume Evaluator" Level="1">
+      <ComponentGroupRef Id="ApplicationFiles" />
+      <ComponentRef Id="StartMenuShortcut" />
+      <ComponentRef Id="DesktopShortcut" />
+    </Feature>
+
+    <Component Id="StartMenuShortcut" Guid="*" Directory="ApplicationProgramsFolder">
+      <Shortcut Id="ApplicationStartMenuShortcut"
+                Name="Resume Evaluator"
+                Target="[INSTALLFOLDER]ResumeEvaluator.exe"
+                WorkingDirectory="INSTALLFOLDER"
+                Icon="ApplicationIcon" />
+      <RemoveFolder Id="RemoveProgramMenuFolder" On="uninstall" />
+      <RemoveFolder Id="RemoveInstallationFolder"
+                    Directory="INSTALLFOLDER"
+                    On="uninstall" />
+      <RegistryValue Root="HKCU"
+                     Key="Software\Resume Evaluator"
+                     Name="StartMenuShortcut"
+                     Type="integer"
+                     Value="1"
+                     KeyPath="yes" />
+    </Component>
+
+    <Component Id="DesktopShortcut" Guid="*" Directory="DesktopFolder">
+      <Shortcut Id="ApplicationDesktopShortcut"
+                Name="Resume Evaluator"
+                Target="[INSTALLFOLDER]ResumeEvaluator.exe"
+                WorkingDirectory="INSTALLFOLDER"
+                Icon="ApplicationIcon" />
+      <RegistryValue Root="HKCU"
+                     Key="Software\Resume Evaluator"
+                     Name="DesktopShortcut"
+                     Type="integer"
+                     Value="1"
+                     KeyPath="yes" />
+    </Component>
+  </Product>
+</Wix>

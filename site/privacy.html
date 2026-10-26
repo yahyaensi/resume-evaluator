@@ -1,0 +1,123 @@
+<!doctype html>
+<html lang="fr">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="description" content="Modèle de politique de confidentialité de Resume Evaluator, à compléter par son éditeur.">
+  <title>Confidentialité — Resume Evaluator</title>
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+  <header class="site-header">
+    <a class="brand" href="./">Resume Evaluator</a>
+    <nav aria-label="Navigation principale">
+      <a href="privacy.html" aria-current="page">Confidentialité</a>
+      <a href="terms.html">Conditions d’utilisation</a>
+      <a href="https://github.com/yahyaensi/resume-evaluator">Code source</a>
+    </nav>
+  </header>
+
+  <main class="document">
+    <p class="eyebrow">Document à compléter avant publication officielle</p>
+    <h1>Politique de confidentialité</h1>
+    <p class="lead">Dernière mise à jour : [À compléter]</p>
+    <aside class="notice warning">
+      <strong>Modèle de travail :</strong> les champs entre crochets doivent être remplacés et
+      le document vérifié par l’éditeur selon son identité, son lieu d’établissement, ses
+      fournisseurs et ses obligations légales. Ne présentez pas cette version comme une
+      politique finalisée.
+    </aside>
+
+    <h2>1. Responsable du traitement et contact</h2>
+    <p>
+      L’application Resume Evaluator est publiée par <strong>[nom légal ou nom de l’éditeur]</strong>,
+      établi à <strong>[adresse professionnelle ou postale]</strong> (« l’éditeur »).
+      Pour toute question relative à cette politique ou aux données : <strong>[adresse de contact à renseigner]</strong>.
+      Délégué à la protection des données, le cas échéant : [nom et coordonnées ou « non désigné »].
+    </p>
+
+    <h2>2. Fonctionnement et données utilisées</h2>
+    <p>
+      Resume Evaluator est une application de bureau. Elle se connecte au compte Gmail de
+      l’utilisateur après autorisation OAuth et demande le seul droit
+      <code>gmail.readonly</code> (lecture seule). Elle ne peut pas envoyer, modifier ou supprimer
+      les messages. Elle lit les messages correspondant aux critères choisis et récupère les
+      pièces jointes de CV prises en charge.
+    </p>
+    <ul>
+      <li><strong>Données du compte Gmail :</strong> adresse du compte, informations des messages nécessaires au traitement et pièces jointes sélectionnées.</li>
+      <li><strong>Données de candidature :</strong> contenu des CV, coordonnées et autres informations personnelles qui y figurent, ainsi que le descriptif de poste fourni par l’utilisateur.</li>
+      <li><strong>Données de configuration :</strong> jeton OAuth de renouvellement, fournisseur et paramètres LLM ; la clé API peut être mémorisée si l’utilisateur le demande.</li>
+      <li><strong>Résultats :</strong> scores, résumés, points forts et éléments à vérifier, exportés dans un fichier Excel à l’emplacement choisi par l’utilisateur.</li>
+    </ul>
+
+    <h2>3. Où les données sont traitées et transmises</h2>
+    <ul>
+      <li>Le traitement des pièces jointes, l’extraction de texte et l’analyse par mots-clés s’effectuent sur l’ordinateur de l’utilisateur.</li>
+      <li>Avec l’évaluation par LLM, le texte du CV et le descriptif de poste sont envoyés au fournisseur LLM sélectionné, notamment si l’utilisateur configure un service externe. Ce fournisseur traite les requêtes selon ses propres conditions et sa politique de confidentialité.</li>
+      <li>Avec Ollama configuré sur l’ordinateur de l’utilisateur ou le mode mots-clés, le contenu des CV n’est pas transmis à un fournisseur LLM tiers. Les communications Gmail et OAuth avec Google restent nécessaires pour accéder au compte.</li>
+      <li>Le site GitHub Pages est hébergé par GitHub. Cette page ne comporte pas de formulaire, de traceur ou de script d’analyse ajouté par l’éditeur. GitHub peut traiter des données techniques de visite selon ses propres documents de confidentialité.</li>
+    </ul>
+    <p>
+      Fournisseurs effectivement utilisés par l’éditeur, région de traitement et éventuels transferts
+      hors Espace économique européen : <strong>[à compléter selon les configurations proposées et utilisées]</strong>.
+    </p>
+
+    <h2>4. Stockage et durée de conservation</h2>
+    <p>
+      Le jeton OAuth est enregistré dans <code>~/.resume-selector/tokens.json</code> sur l’ordinateur
+      de l’utilisateur. Si l’utilisateur choisit de mémoriser une clé API LLM, celle-ci est stockée
+      localement dans <code>llm_api_keys.json</code>. Les fichiers Excel exportés restent à
+      l’emplacement choisi par l’utilisateur. L’application ne dispose pas d’un serveur central
+      de stockage des CV dans son fonctionnement normal.
+    </p>
+    <p>
+      L’utilisateur contrôle la suppression locale des rapports et des clés mémorisées. Il peut
+      se déconnecter pour supprimer le jeton local et révoquer l’autorisation Google. Durées de
+      conservation appliquées par l’éditeur et fournisseurs LLM : <strong>[à compléter ; vérifier
+      les paramètres et politiques de chaque fournisseur]</strong>.
+    </p>
+
+    <h2>5. Finalités et base juridique</h2>
+    <p>
+      Les données sont utilisées pour accéder aux CV sélectionnés, les comparer au descriptif de
+      poste demandé par l’utilisateur et produire un rapport d’aide au recrutement. Responsable
+      du traitement, finalités précises et bases juridiques applicables : <strong>[à compléter par
+      l’organisation qui utilise l’application, en tenant compte du droit applicable]</strong>.
+    </p>
+    <p>
+      L’application ne doit pas être utilisée comme seul fondement d’une décision de recrutement.
+      Les résultats automatisés peuvent être inexacts ou biaisés et doivent faire l’objet d’un
+      examen humain approprié.
+    </p>
+
+    <h2>6. Droits des personnes</h2>
+    <p>
+      Selon le droit applicable, les personnes concernées peuvent notamment disposer de droits
+      d’accès, de rectification, d’effacement, de limitation, d’opposition ou de réclamation.
+      Pour exercer ces droits, contacter <strong>[adresse de contact à renseigner]</strong>.
+      L’organisation qui utilise l’application doit traiter les demandes liées aux candidatures
+      et informer les candidats de ses propres pratiques.
+    </p>
+
+    <h2>7. Sécurité et incidents</h2>
+    <p>
+      Les jetons et clés mémorisés sont enregistrés localement. L’utilisateur et l’organisation
+      restent responsables de la sécurité de l’ordinateur, des exports, des identifiants LLM et
+      des accès au compte Gmail. Mesures organisationnelles complémentaires et contact en cas
+      d’incident : <strong>[à compléter]</strong>.
+    </p>
+
+    <h2>8. Modifications</h2>
+    <p>
+      La présente politique peut être mise à jour. La date de dernière mise à jour figure en haut
+      de cette page. Modalités d’information des utilisateurs : <strong>[à compléter]</strong>.
+    </p>
+  </main>
+
+  <footer class="site-footer">
+    <a href="./">Accueil</a>
+    <span>© 2026 <strong>[À compléter : nom de l’éditeur]</strong></span>
+  </footer>
+</body>
+</html>

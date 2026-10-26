@@ -1,0 +1,93 @@
+<!doctype html>
+<html lang="fr">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="description" content="Resume Evaluator aide à analyser des CV avec un LLM ou par mots-clés, à partir de Gmail.">
+  <title>Resume Evaluator — Évaluation de CV</title>
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+  <header class="site-header">
+    <a class="brand" href="./">Resume Evaluator</a>
+    <nav aria-label="Navigation principale">
+      <a href="privacy.html">Confidentialité</a>
+      <a href="terms.html">Conditions d’utilisation</a>
+      <a href="https://github.com/yahyaensi/resume-evaluator">Code source</a>
+    </nav>
+  </header>
+
+  <main>
+    <section class="hero">
+      <p class="eyebrow">Application de bureau · Java</p>
+      <h1>Évaluer des CV avec l’aide de l’IA</h1>
+      <p class="lead">
+        Resume Evaluator récupère les CV reçus dans Gmail et les compare à un descriptif de poste.
+        Choisissez un modèle de langage (LLM) pour une évaluation assistée par IA, ou une analyse
+        locale par mots-clés.
+      </p>
+      <div class="actions">
+        <a class="button" href="https://github.com/yahyaensi/resume-evaluator/releases">Télécharger l’application</a>
+        <a class="text-link" href="https://github.com/yahyaensi/resume-evaluator">Voir le projet sur GitHub</a>
+      </div>
+      <p class="notice">
+        L’évaluation est une aide au tri et ne remplace pas l’examen humain des candidatures.
+      </p>
+    </section>
+
+    <section class="features" aria-label="Fonctionnalités">
+      <article class="card">
+        <span class="card-number">01</span>
+        <h2>Évaluation par LLM</h2>
+        <p>
+          Utilisez OpenRouter, Anthropic, OpenAI, Mistral, Ollama ou une API compatible.
+          Avec un fournisseur externe, le texte du CV et le descriptif de poste sont transmis
+          à ce fournisseur pour l’évaluation.
+        </p>
+      </article>
+      <article class="card">
+        <span class="card-number">02</span>
+        <h2>Analyse par mots-clés</h2>
+        <p>
+          Une option sans LLM compare localement les mots-clés du descriptif et des CV.
+          Le contenu des CV n’est alors pas envoyé à un service d’IA.
+        </p>
+      </article>
+      <article class="card">
+        <span class="card-number">03</span>
+        <h2>Rapport Excel</h2>
+        <p>
+          Consultez les scores, résumés, points forts et points à vérifier dans un rapport
+          Excel enregistré à l’emplacement que vous choisissez.
+        </p>
+      </article>
+    </section>
+
+    <section class="info-panel">
+      <div>
+        <p class="eyebrow">Accès Gmail</p>
+        <h2>Lecture seule, avec votre autorisation</h2>
+      </div>
+      <p>
+        L’application demande le droit OAuth <code>gmail.readonly</code>. Le jeton de
+        renouvellement est conservé sur votre ordinateur. Les CV, les données personnelles
+        qu’ils contiennent et les résultats doivent être traités avec précaution.
+      </p>
+    </section>
+
+    <section class="legal-links" aria-label="Informations juridiques">
+      <h2>Informations</h2>
+      <p>
+        Consultez la <a href="privacy.html">politique de confidentialité</a> et les
+        <a href="terms.html">conditions d’utilisation</a>. Ces documents sont des modèles
+        à compléter et à valider par l’éditeur avant toute utilisation officielle.
+      </p>
+    </section>
+  </main>
+
+  <footer class="site-footer">
+    <span>Resume Evaluator</span>
+    <span>© <span id="year">2026</span> <strong>[À compléter : nom de l’éditeur]</strong></span>
+  </footer>
+</body>
+</html>
